@@ -72,12 +72,12 @@ export default function ClassWorkspacePage() {
           {/* Tabs */}
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
             <div className="border-b border-gray-200 dark:border-gray-700">
-              <nav className="flex overflow-x-auto" aria-label="Tabs">
+              <nav className="flex overflow-x-auto scrollbar-hide -mx-4 sm:mx-0 px-4 sm:px-0" aria-label="Tabs">
                 {tabs.map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`px-6 py-4 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+                    className={`px-4 sm:px-6 py-3 sm:py-4 text-sm font-medium whitespace-nowrap border-b-2 transition-colors min-w-fit ${
                       activeTab === tab.id
                         ? 'border-blue-600 text-blue-600 dark:text-blue-400'
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
@@ -90,7 +90,7 @@ export default function ClassWorkspacePage() {
             </div>
 
             {/* Tab Content */}
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               {activeTab === 'students' && <StudentsTab classId={classId} />}
               {activeTab === 'subjects' && <SubjectsTab classId={classId} />}
               {activeTab === 'grades' && <GradesTab classId={classId} />}

@@ -67,16 +67,16 @@ export default function ResultsTab({ classId }: { classId: string }) {
   return (
     <div>
       <div className="mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Results</h2>
-        <div className="flex flex-wrap gap-4">
-          <div>
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Results</h2>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               View
             </label>
             <select
               value={selectedSubject}
               onChange={(e) => setSelectedSubject(e.target.value)}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white outline-none"
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white outline-none text-base min-h-[44px]"
             >
               <option value="all">Overall Results</option>
               {classData.subjects.map((subject) => (
@@ -86,14 +86,14 @@ export default function ResultsTab({ classId }: { classId: string }) {
               ))}
             </select>
           </div>
-          <div>
+          <div className="flex-1">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Gender Filter
             </label>
             <select
               value={genderFilter}
               onChange={(e) => setGenderFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white outline-none"
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white outline-none text-base min-h-[44px]"
             >
               <option value="all">All</option>
               <option value="Male">Male</option>
@@ -104,44 +104,22 @@ export default function ResultsTab({ classId }: { classId: string }) {
       </div>
 
       {selectedSubject === 'all' ? (
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-700">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Position
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Gender
-                </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Total Marks
-                </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Average
-                </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Overall Grade
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Remark
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {overallResults.map((result) => (
-                <tr
-                  key={result.student.id}
-                  className={`hover:bg-gray-50 dark:hover:bg-gray-700 ${
-                    result.position <= 3 ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''
-                  }`}
-                >
-                  <td className="px-6 py-4 whitespace-nowrap">
+        <>
+          {/* Mobile Card View */}
+          <div className="md:hidden space-y-3">
+            {overallResults.map((result) => (
+              <div
+                key={result.student.id}
+                className={`bg-white dark:bg-gray-800 rounded-lg border-2 p-4 ${
+                  result.position <= 3
+                    ? 'border-yellow-400 dark:border-yellow-600 bg-yellow-50 dark:bg-yellow-900/20'
+                    : 'border-gray-200 dark:border-gray-700'
+                }`}
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-2">
                     <span
-                      className={`text-sm font-bold ${
+                      className={`text-lg font-bold ${
                         result.position === 1
                           ? 'text-yellow-600 dark:text-yellow-400'
                           : result.position === 2
@@ -154,35 +132,176 @@ export default function ResultsTab({ classId }: { classId: string }) {
                       {result.position === 1 && '🥇'}
                       {result.position === 2 && '🥈'}
                       {result.position === 3 && '🥉'}
-                      {result.position > 3 && result.position}
+                      {result.position > 3 && `#${result.position}`}
                     </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                    {result.student.name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    {result.student.gender}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 dark:text-white">
-                    {result.totalMarks}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-center font-semibold text-gray-900 dark:text-white">
-                    {result.average}%
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-center font-bold text-blue-600 dark:text-blue-400">
-                    {result.grade}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    {result.remark}
-                  </td>
+                    <div>
+                      <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+                        {result.student.name}
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{result.student.gender}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Total Marks</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">{result.totalMarks}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Average</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">{result.average}%</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Grade</p>
+                    <p className="text-sm font-bold text-blue-600 dark:text-blue-400">{result.grade}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Remark</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">{result.remark}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Position
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Name
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Gender
+                  </th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Total Marks
+                  </th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Average
+                  </th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Overall Grade
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Remark
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                {overallResults.map((result) => (
+                  <tr
+                    key={result.student.id}
+                    className={`hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                      result.position <= 3 ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''
+                    }`}
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`text-sm font-bold ${
+                          result.position === 1
+                            ? 'text-yellow-600 dark:text-yellow-400'
+                            : result.position === 2
+                            ? 'text-gray-600 dark:text-gray-400'
+                            : result.position === 3
+                            ? 'text-orange-600 dark:text-orange-400'
+                            : 'text-gray-500 dark:text-gray-500'
+                        }`}
+                      >
+                        {result.position === 1 && '🥇'}
+                        {result.position === 2 && '🥈'}
+                        {result.position === 3 && '🥉'}
+                        {result.position > 3 && result.position}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                      {result.student.name}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                      {result.student.gender}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 dark:text-white">
+                      {result.totalMarks}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-center font-semibold text-gray-900 dark:text-white">
+                      {result.average}%
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-center font-bold text-blue-600 dark:text-blue-400">
+                      {result.grade}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                      {result.remark}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <>
+          {/* Mobile Card View for Subject Results */}
+          <div className="md:hidden space-y-3">
+            {subjectResults.map((result) => (
+              <div
+                key={result.student.id}
+                className={`bg-white dark:bg-gray-800 rounded-lg border-2 p-4 ${
+                  result.position <= 3
+                    ? 'border-yellow-400 dark:border-yellow-600 bg-yellow-50 dark:bg-yellow-900/20'
+                    : 'border-gray-200 dark:border-gray-700'
+                }`}
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`text-lg font-bold ${
+                        result.position === 1
+                          ? 'text-yellow-600 dark:text-yellow-400'
+                          : result.position === 2
+                          ? 'text-gray-600 dark:text-gray-400'
+                          : result.position === 3
+                          ? 'text-orange-600 dark:text-orange-400'
+                          : 'text-gray-500 dark:text-gray-500'
+                      }`}
+                    >
+                      {result.position === 1 && '🥇'}
+                      {result.position === 2 && '🥈'}
+                      {result.position === 3 && '🥉'}
+                      {result.position > 3 && `#${result.position}`}
+                    </span>
+                    <div>
+                      <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+                        {result.student.name}
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{result.student.gender}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Mark</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">{result.mark}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Grade</p>
+                    <p className="text-sm font-bold text-blue-600 dark:text-blue-400">{result.grade}</p>
+                  </div>
+                  <div className="col-span-2">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Remark</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">{result.remark}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-700">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -250,7 +369,8 @@ export default function ResultsTab({ classId }: { classId: string }) {
               ))}
             </tbody>
           </table>
-        </div>
+          </div>
+        </>
       )}
     </div>
   );

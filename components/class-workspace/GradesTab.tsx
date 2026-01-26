@@ -56,11 +56,11 @@ export default function GradesTab({ classId }: { classId: string }) {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Grading Rules</h2>
         <button
           onClick={handleAddRule}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors min-h-[44px] w-full sm:w-auto"
         >
           + Add Rule
         </button>
@@ -78,18 +78,18 @@ export default function GradesTab({ classId }: { classId: string }) {
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Preview Grade (Enter a mark)
         </label>
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           <input
             type="number"
             min="0"
             max="100"
             value={previewMark}
             onChange={(e) => setPreviewMark(e.target.value)}
-            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white outline-none"
+            className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white outline-none text-base min-h-[44px]"
             placeholder="Enter mark (0-100)"
           />
           {previewMark && (
-            <div className="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+            <div className="px-4 py-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center min-h-[44px]">
               {(() => {
                 const mark = parseInt(previewMark);
                 if (isNaN(mark) || mark < 0 || mark > 100) {
@@ -110,7 +110,7 @@ export default function GradesTab({ classId }: { classId: string }) {
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-gray-50 dark:bg-gray-700">
             <tr>
