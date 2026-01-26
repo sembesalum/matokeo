@@ -1,36 +1,145 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Matokeo - Teacher Results Management Tool
+
+A fully interactive frontend-only prototype for managing student results, built with Next.js, React, and Tailwind CSS.
+
+## Features
+
+### Authentication
+- Login and Register pages (UI only, uses localStorage)
+- Fake authentication that accepts any credentials
+
+### Dashboard
+- Overview cards showing:
+  - Total Classes
+  - Total Students
+  - Total Subjects
+  - Overall Average Performance
+- Performance charts:
+  - Performance per class
+  - Gender distribution
+
+### Classes Management
+- View all classes in a card-based layout
+- Create new classes
+- Each class shows:
+  - Number of students
+  - Number of subjects
+
+### Class Workspace
+Each class has a comprehensive workspace with 6 tabs:
+
+#### 1. Students Tab
+- Add new students (name, gender)
+- List all students in a table
+- Delete students
+- Import Excel button (UI only)
+
+#### 2. Subjects Tab
+- Add new subjects
+- List all subjects
+- Delete subjects
+
+#### 3. Grades Tab
+- Define grading rules per class
+- Configure:
+  - Mark ranges (From/To)
+  - Grade letters
+  - Points
+  - Remarks
+- Prevent overlapping ranges
+- Preview grade for any mark
+
+#### 4. Marks Tab
+- Spreadsheet-style interface
+- Rows: Students
+- Columns: Subjects
+- Input marks (0-100)
+- Auto-calculate grades based on rules
+- Real-time updates
+
+#### 5. Results Tab
+- Overall Results:
+  - Position ranking
+  - Total marks
+  - Average percentage
+  - Overall grade
+  - Remarks
+  - Highlight top 3 students
+- Subject-specific results
+- Gender filtering
+- Sorting by performance
+
+#### 6. Export Tab
+- Export to Excel (UI simulation)
+- Export to PDF (UI simulation)
+- Preview modal
+- Success notifications
+
+## Tech Stack
+
+- **Next.js 16** - React framework
+- **React 19** - UI library
+- **TypeScript** - Type safety
+- **Tailwind CSS v4** - Styling
+- **localStorage** - Data persistence (frontend only)
 
 ## Getting Started
 
-First, run the development server:
+First, install dependencies:
+
+```bash
+npm install
+```
+
+Then, run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Demo Data
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The application comes pre-loaded with realistic mock data:
+- 3 classes (Form 4A, Form 3B, Form 2C)
+- 8-15 students per class
+- 3-5 subjects per class
+- Pre-filled marks and grades
+- Realistic grading rules
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+matokeo/
+├── app/
+│   ├── login/          # Login page
+│   ├── register/       # Register page
+│   ├── dashboard/      # Dashboard page
+│   ├── classes/        # Classes list and workspace
+│   └── layout.tsx      # Root layout with AppProvider
+├── components/
+│   ├── Navbar.tsx      # Navigation bar
+│   ├── ProtectedRoute.tsx  # Route protection
+│   └── class-workspace/    # Class workspace tabs
+├── contexts/
+│   └── AppContext.tsx  # Global state management
+└── lib/
+    └── mockData.ts     # Mock data and types
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Notes
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- This is a **frontend-only prototype**
+- All data is stored in localStorage
+- No backend integration
+- Authentication is simulated
+- Export functions are UI-only (no actual file generation)
 
-## Deploy on Vercel
+## Future Enhancements
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Ready for backend integration:
+- Replace localStorage with API calls
+- Implement real authentication
+- Add actual file export functionality
+- Add data persistence to database
