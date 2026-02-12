@@ -1,16 +1,16 @@
 export interface Student {
-  id: string;
+  id: string | number;
   name: string;
   gender: 'Male' | 'Female';
 }
 
 export interface Subject {
-  id: string;
+  id: string | number;
   name: string;
 }
 
 export interface GradeRule {
-  id: string;
+  id: string | number;
   fromMark: number;
   toMark: number;
   grade: string;
@@ -19,13 +19,13 @@ export interface GradeRule {
 }
 
 export interface Mark {
-  studentId: string;
-  subjectId: string;
+  studentId: string | number;
+  subjectId: string | number;
   mark: number;
 }
 
 export interface Class {
-  id: string;
+  id: string | number;
   name: string;
   students: Student[];
   subjects: Subject[];
@@ -34,9 +34,10 @@ export interface Class {
 }
 
 export interface User {
-  id: string;
+  id: string | number;
   name: string;
   email: string;
+  role?: 'TEACHER' | 'ADMIN';
 }
 
 // Mock data

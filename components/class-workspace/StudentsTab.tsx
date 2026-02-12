@@ -12,16 +12,18 @@ export default function StudentsTab({ classId }: { classId: string }) {
 
   if (!classData) return null;
 
-  const handleAddStudent = () => {
+  const handleAddStudent = async () => {
     if (newStudent.name.trim()) {
-      const student: Student = {
-        id: `s-${Date.now()}`,
-        name: newStudent.name.trim(),
-        gender: newStudent.gender,
-      };
-      addStudent(classId, student);
-      setNewStudent({ name: '', gender: 'Male' });
-      setShowAddModal(false);
+      try {
+        await addStudent(classId, {
+          name: newStudent.name.trim(),
+          gender: newStudent.gender,
+        });
+        setNewStudent({ name: '', gender: 'Male' });
+        setShowAddModal(false);
+      } catch (err) {
+        // Error handled by AppContext
+      }
     }
   };
 
@@ -44,7 +46,7 @@ export default function StudentsTab({ classId }: { classId: string }) {
         </div>
       </div>
 
-      {classData.students.length === 0 ? (
+      {(classData.students ?? []).length === 0 ? (
         <div className="text-center py-12 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
           <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -56,7 +58,7 @@ export default function StudentsTab({ classId }: { classId: string }) {
         <>
           {/* Mobile Card View */}
           <div className="md:hidden space-y-3">
-            {classData.students.map((student, index) => (
+            {(classData.students ?? []).map((student, index) => (
               <div
                 key={student.id}
                 className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4"
@@ -106,7 +108,7 @@ export default function StudentsTab({ classId }: { classId: string }) {
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {classData.students.map((student, index) => (
+                {(classData.students ?? []).map((student, index) => (
                   <tr key={student.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       {index + 1}

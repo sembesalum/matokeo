@@ -94,10 +94,10 @@ export default function ExportTab({ classId }: { classId: string }) {
                 <strong>Class:</strong> {classData.name}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                <strong>Students:</strong> {classData.students.length}
+                <strong>Students:</strong> {(classData.students ?? []).length}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                <strong>Subjects:</strong> {classData.subjects.length}
+                <strong>Subjects:</strong> {(classData.subjects ?? []).length}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 <strong>Format:</strong> {exportType === 'excel' ? '.xlsx' : '.pdf'}

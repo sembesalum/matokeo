@@ -12,14 +12,18 @@ export default function GradesTab({ classId }: { classId: string }) {
 
   if (!classData) return null;
 
-  const handleUpdateRule = (ruleId: string, updates: Partial<GradeRule>) => {
+  const handleUpdateRule = async (ruleId: string | number, updates: Partial<GradeRule>) => {
     const updatedRules = classData.gradeRules.map(r =>
-      r.id === ruleId ? { ...r, ...updates } : r
+      String(r.id) === String(ruleId) ? { ...r, ...updates } : r
     );
-    updateGradeRules(classId, updatedRules);
+    try {
+      await updateGradeRules(classId, updatedRules);
+    } catch (err) {
+      // Error handled by AppContext
+    }
   };
 
-  const handleAddRule = () => {
+  const handleAddRule = async () => {
     const newRule: GradeRule = {
       id: `g-${Date.now()}`,
       fromMark: 0,
@@ -28,12 +32,20 @@ export default function GradesTab({ classId }: { classId: string }) {
       points: 0,
       remark: '',
     };
-    updateGradeRules(classId, [...classData.gradeRules, newRule]);
+    try {
+      await updateGradeRules(classId, [...classData.gradeRules, newRule]);
+    } catch (err) {
+      // Error handled by AppContext
+    }
   };
 
-  const handleDeleteRule = (ruleId: string) => {
+  const handleDeleteRule = async (ruleId: string | number) => {
     if (confirm('Are you sure you want to delete this grade rule?')) {
-      updateGradeRules(classId, classData.gradeRules.filter(r => r.id !== ruleId));
+      try {
+        await updateGradeRules(classId, classData.gradeRules.filter(r => String(r.id) !== String(ruleId)));
+      } catch (err) {
+        // Error handled by AppContext
+      }
     }
   };
 
@@ -143,7 +155,7 @@ export default function GradesTab({ classId }: { classId: string }) {
                     min="0"
                     max="100"
                     value={rule.fromMark}
-                    onChange={(e) => handleUpdateRule(rule.id, { fromMark: parseInt(e.target.value) || 0 })}
+                    onChange={(e) => handleUpdateRule(rule.id, { fromMark: parseInt(e.target.value) || 0 }).catch(() => {})}
                     className="w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white outline-none text-sm"
                   />
                 </td>
@@ -153,7 +165,7 @@ export default function GradesTab({ classId }: { classId: string }) {
                     min="0"
                     max="100"
                     value={rule.toMark}
-                    onChange={(e) => handleUpdateRule(rule.id, { toMark: parseInt(e.target.value) || 0 })}
+                    onChange={(e) => handleUpdateRule(rule.id, { toMark: parseInt(e.target.value) || 0 }).catch(() => {})}
                     className="w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white outline-none text-sm"
                   />
                 </td>
@@ -161,7 +173,7 @@ export default function GradesTab({ classId }: { classId: string }) {
                   <input
                     type="text"
                     value={rule.grade}
-                    onChange={(e) => handleUpdateRule(rule.id, { grade: e.target.value })}
+                    onChange={(e) => handleUpdateRule(rule.id, { grade: e.target.value }).catch(() => {})}
                     className="w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white outline-none text-sm"
                     placeholder="A"
                   />
@@ -172,7 +184,7 @@ export default function GradesTab({ classId }: { classId: string }) {
                     min="0"
                     max="5"
                     value={rule.points}
-                    onChange={(e) => handleUpdateRule(rule.id, { points: parseInt(e.target.value) || 0 })}
+                    onChange={(e) => handleUpdateRule(rule.id, { points: parseInt(e.target.value) || 0 }).catch(() => {})}
                     className="w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white outline-none text-sm"
                   />
                 </td>
@@ -180,7 +192,7 @@ export default function GradesTab({ classId }: { classId: string }) {
                   <input
                     type="text"
                     value={rule.remark}
-                    onChange={(e) => handleUpdateRule(rule.id, { remark: e.target.value })}
+                    onChange={(e) => handleUpdateRule(rule.id, { remark: e.target.value }).catch(() => {})}
                     className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white outline-none text-sm"
                     placeholder="Excellent"
                   />

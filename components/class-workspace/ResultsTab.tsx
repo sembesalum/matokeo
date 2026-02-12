@@ -24,10 +24,10 @@ export default function ResultsTab({ classId }: { classId: string }) {
   };
 
   const calculateStudentResults = () => {
-    return classData.students
+    return (classData.students ?? [])
       .filter(student => genderFilter === 'all' || student.gender === genderFilter)
       .map(student => {
-        const marks = classData.subjects.map(subject => getMark(student.id, subject.id));
+        const marks = (classData.subjects ?? []).map(subject => getMark(student.id, subject.id));
         const totalMarks = marks.reduce((sum, m) => sum + m, 0);
         const average = marks.length > 0 ? Math.round((totalMarks / marks.length) * 10) / 10 : 0;
         const overallGrade = getGrade(average);
@@ -45,7 +45,7 @@ export default function ResultsTab({ classId }: { classId: string }) {
   };
 
   const calculateSubjectResults = (subjectId: string) => {
-    return classData.students
+    return (classData.students ?? [])
       .filter(student => genderFilter === 'all' || student.gender === genderFilter)
       .map(student => {
         const mark = getMark(student.id, subjectId);
@@ -79,7 +79,7 @@ export default function ResultsTab({ classId }: { classId: string }) {
               className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white outline-none text-base min-h-[44px]"
             >
               <option value="all">Overall Results</option>
-              {classData.subjects.map((subject) => (
+              {(classData.subjects ?? []).map((subject) => (
                 <option key={subject.id} value={subject.id}>
                   {subject.name}
                 </option>

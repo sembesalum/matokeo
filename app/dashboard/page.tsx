@@ -7,20 +7,36 @@ import Link from 'next/link';
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { classes } = useApp();
+  const { classes, loading } = useApp();
+  const classList = Array.isArray(classes) ? classes : [];
 
-  const totalStudents = classes.reduce((sum, c) => sum + c.students.length, 0);
-  const totalSubjects = new Set(classes.flatMap(c => c.subjects.map(s => s.name))).size;
+  // Calculate stats from classes (fallback if API summary not available)
+  const totalStudents = classList.reduce((sum, c) => {
+    // Handle both full class objects and lightweight class objects
+    if ('students' in c && Array.isArray(c.students)) {
+      return sum + c.students.length;
+    }
+    return sum + (c.studentCount || 0);
+  }, 0);
+  
+  const totalSubjects = new Set(
+    classList.flatMap(c => {
+      if ('subjects' in c && Array.isArray(c.subjects)) {
+        return c.subjects.map(s => s.name);
+      }
+      return [];
+    })
+  ).size;
   
   // Calculate overall average performance
-  const allMarks = classes.flatMap(c => c.marks);
+  const allMarks = classList.flatMap(c => ('marks' in c && Array.isArray(c.marks)) ? c.marks : []);
   const averagePerformance = allMarks.length > 0
     ? Math.round((allMarks.reduce((sum, m) => sum + m.mark, 0) / allMarks.length) * 10) / 10
     : 0;
 
   // Performance per class
-  const classPerformance = classes.map(c => {
-    const classMarks = c.marks;
+  const classPerformance = classList.map(c => {
+    const classMarks = ('marks' in c && Array.isArray(c.marks)) ? c.marks : [];
     const avg = classMarks.length > 0
       ? Math.round((classMarks.reduce((sum, m) => sum + m.mark, 0) / classMarks.length) * 10) / 10
       : 0;
@@ -28,10 +44,12 @@ export default function DashboardPage() {
   });
 
   // Gender comparison
-  const genderStats = classes.reduce((acc, c) => {
-    c.students.forEach(s => {
-      acc[s.gender] = (acc[s.gender] || 0) + 1;
-    });
+  const genderStats = classList.reduce((acc, c) => {
+    if ('students' in c && Array.isArray(c.students)) {
+      c.students.forEach(s => {
+        acc[s.gender] = (acc[s.gender] || 0) + 1;
+      });
+    }
     return acc;
   }, {} as Record<string, number>);
 
@@ -42,6 +60,19 @@ export default function DashboardPage() {
       router.push('/classes?create=true');
     }
   };
+
+  if (loading) {
+    return (
+      <ProtectedRoute>
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto" />
+            <p className="mt-4 text-gray-600 dark:text-gray-400">Loading...</p>
+          </div>
+        </div>
+      </ProtectedRoute>
+    );
+  }
 
   return (
     <ProtectedRoute>
@@ -62,7 +93,7 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Classes</p>
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">{classes.length}</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">{classList.length}</p>
                 </div>
                 <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                   <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

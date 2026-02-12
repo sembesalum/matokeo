@@ -38,12 +38,12 @@ export default function MarksTab({ classId }: { classId: string }) {
         </p>
       </div>
 
-      {classData.students.length === 0 || classData.subjects.length === 0 ? (
+      {(classData.students ?? []).length === 0 || (classData.subjects ?? []).length === 0 ? (
         <div className="text-center py-12 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
           <p className="text-gray-600 dark:text-gray-400">
-            {classData.students.length === 0 && classData.subjects.length === 0
+            {(classData.students ?? []).length === 0 && (classData.subjects ?? []).length === 0
               ? 'Please add students and subjects first.'
-              : classData.students.length === 0
+              : (classData.students ?? []).length === 0
               ? 'Please add students first.'
               : 'Please add subjects first.'}
           </p>
@@ -52,7 +52,7 @@ export default function MarksTab({ classId }: { classId: string }) {
         <>
           {/* Mobile Card View */}
           <div className="lg:hidden space-y-4">
-            {classData.students.map((student) => (
+            {(classData.students ?? []).map((student) => (
               <div
                 key={student.id}
                 className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4"
@@ -61,7 +61,7 @@ export default function MarksTab({ classId }: { classId: string }) {
                   {student.name}
                 </h3>
                 <div className="space-y-3">
-                  {classData.subjects.map((subject) => {
+                  {(classData.subjects ?? []).map((subject) => {
                     const mark = getMark(student.id, subject.id);
                     const grade = mark > 0 ? getGrade(mark) : '-';
                     return (
@@ -98,7 +98,7 @@ export default function MarksTab({ classId }: { classId: string }) {
                     <th className="sticky left-0 z-10 px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider bg-gray-50 dark:bg-gray-700 border-r border-gray-200 dark:border-gray-600">
                       Student
                     </th>
-                    {classData.subjects.map((subject) => (
+                    {(classData.subjects ?? []).map((subject) => (
                       <th
                         key={subject.id}
                         className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider min-w-[120px]"
@@ -109,12 +109,12 @@ export default function MarksTab({ classId }: { classId: string }) {
                   </tr>
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                  {classData.students.map((student) => (
+                  {(classData.students ?? []).map((student) => (
                     <tr key={student.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                       <td className="sticky left-0 z-10 px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-600">
                         {student.name}
                       </td>
-                      {classData.subjects.map((subject) => {
+                      {(classData.subjects ?? []).map((subject) => {
                         const mark = getMark(student.id, subject.id);
                         const grade = mark > 0 ? getGrade(mark) : '-';
                         return (

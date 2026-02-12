@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useApp } from '@/contexts/AppContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -24,11 +24,44 @@ export default function ClassWorkspacePage() {
   const params = useParams();
   const router = useRouter();
   const classId = params.id as string;
-  const { getClass } = useApp();
+  const { getClass, loadClass } = useApp();
   const classData = getClass(classId);
   const [activeTab, setActiveTab] = useState('students');
+  const [loading, setLoading] = useState(true);
 
-  if (!classData) {
+  useEffect(() => {
+    const fetchClass = async () => {
+      if (!classData) {
+        setLoading(true);
+        try {
+          await loadClass(classId);
+        } catch (err) {
+          console.error('Failed to load class:', err);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
+      }
+    };
+    fetchClass();
+  }, [classId, classData, loadClass]);
+
+  if (loading) {
+    return (
+      <ProtectedRoute>
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600 dark:text-gray-400">Loading class...</p>
+          </div>
+        </div>
+      </ProtectedRoute>
+    );
+  }
+
+  const currentClassData = getClass(classId);
+  if (!currentClassData) {
     return (
       <ProtectedRoute>
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
@@ -62,7 +95,7 @@ export default function ClassWorkspacePage() {
               Back to Classes
             </button>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              {classData.name}
+              {currentClassData.name}
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
               Manage students, subjects, grades, and results

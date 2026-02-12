@@ -1,155 +1,254 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 import { Class, Student, Subject, GradeRule, Mark, User } from '@/lib/mockData';
-import { initialMockData } from '@/lib/mockData';
+import * as api from '@/lib/api';
 
 interface AppContextType {
   user: User | null;
   classes: Class[];
+  loading: boolean;
+  error: string | null;
   setUser: (user: User | null) => void;
-  addClass: (className: string) => void;
-  updateClass: (classId: string, updates: Partial<Class>) => void;
-  addStudent: (classId: string, student: Student) => void;
-  deleteStudent: (classId: string, studentId: string) => void;
-  addSubject: (classId: string, subject: Subject) => void;
-  deleteSubject: (classId: string, subjectId: string) => void;
-  updateGradeRules: (classId: string, rules: GradeRule[]) => void;
-  updateMark: (classId: string, mark: Mark) => void;
-  getClass: (classId: string) => Class | undefined;
+  loadClasses: () => Promise<void>;
+  loadClass: (classId: string | number) => Promise<Class | null>;
+  addClass: (className: string) => Promise<void>;
+  addStudent: (classId: string | number, student: Omit<Student, 'id'>) => Promise<void>;
+  deleteStudent: (classId: string | number, studentId: string | number) => Promise<void>;
+  addSubject: (classId: string | number, subject: Omit<Subject, 'id'>) => Promise<void>;
+  deleteSubject: (classId: string | number, subjectId: string | number) => Promise<void>;
+  updateGradeRules: (classId: string | number, rules: GradeRule[]) => Promise<void>;
+  updateMark: (classId: string | number, mark: Mark) => Promise<void>;
+  getClass: (classId: string | number) => Class | undefined;
+  refreshClass: (classId: string | number) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [classes, setClasses] = useState<Class[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Load data from localStorage on mount
+  // Check authentication on mount
   useEffect(() => {
-    const savedUser = localStorage.getItem('matokeo_user');
-    const savedClasses = localStorage.getItem('matokeo_classes');
-
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-
-    if (savedClasses) {
-      setClasses(JSON.parse(savedClasses));
-    } else {
-      // Initialize with mock data
-      setClasses(initialMockData);
-      localStorage.setItem('matokeo_classes', JSON.stringify(initialMockData));
-    }
+    checkAuth();
   }, []);
 
-  // Save classes to localStorage whenever they change
-  useEffect(() => {
-    if (classes.length > 0) {
-      localStorage.setItem('matokeo_classes', JSON.stringify(classes));
+  const checkAuth = async () => {
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('matokeo_token') : null;
+      if (token) {
+        const userData = await api.authAPI.getMe();
+        setUser({
+          id: userData.id,
+          name: userData.name,
+          email: userData.email,
+          role: userData.role,
+        });
+        await loadClasses();
+      } else {
+        setLoading(false);
+      }
+    } catch (err: any) {
+      console.error('Auth check failed:', err);
+      api.authAPI.logout();
+      setUser(null);
+      setLoading(false);
     }
-  }, [classes]);
-
-  // Save user to localStorage whenever it changes
-  useEffect(() => {
-    if (user) {
-      localStorage.setItem('matokeo_user', JSON.stringify(user));
-    } else {
-      localStorage.removeItem('matokeo_user');
-    }
-  }, [user]);
-
-  const addClass = (className: string) => {
-    const newClass: Class = {
-      id: `class-${Date.now()}`,
-      name: className,
-      students: [],
-      subjects: [],
-      gradeRules: [
-        { id: 'g-default-1', fromMark: 80, toMark: 100, grade: 'A', points: 5, remark: 'Excellent' },
-        { id: 'g-default-2', fromMark: 70, toMark: 79, grade: 'B', points: 4, remark: 'Very Good' },
-        { id: 'g-default-3', fromMark: 60, toMark: 69, grade: 'C', points: 3, remark: 'Good' },
-        { id: 'g-default-4', fromMark: 50, toMark: 59, grade: 'D', points: 2, remark: 'Satisfactory' },
-        { id: 'g-default-5', fromMark: 40, toMark: 49, grade: 'E', points: 1, remark: 'Pass' },
-        { id: 'g-default-6', fromMark: 0, toMark: 39, grade: 'F', points: 0, remark: 'Fail' },
-      ],
-      marks: [],
-    };
-    setClasses([...classes, newClass]);
   };
 
-  const updateClass = (classId: string, updates: Partial<Class>) => {
-    setClasses(classes.map(c => c.id === classId ? { ...c, ...updates } : c));
-  };
+  const loadClasses = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-  const addStudent = (classId: string, student: Student) => {
-    setClasses(classes.map(c => 
-      c.id === classId 
-        ? { ...c, students: [...c.students, student] }
-        : c
-    ));
-  };
+      // First load the list of classes for this teacher
+      const classesData = await api.classesAPI.getAll();
+      const summaryList = Array.isArray(classesData) ? classesData : [];
 
-  const deleteStudent = (classId: string, studentId: string) => {
-    setClasses(classes.map(c => 
-      c.id === classId 
-        ? { 
-            ...c, 
-            students: c.students.filter(s => s.id !== studentId),
-            marks: c.marks.filter(m => m.studentId !== studentId)
+      if (summaryList.length === 0) {
+        setClasses([]);
+        return;
+      }
+
+      // Then load full details for each class in parallel
+      const detailedList = await Promise.all(
+        summaryList.map(async (c) => {
+          try {
+            // This returns full workspace: students, subjects, gradeRules, marks
+            return await api.classesAPI.getById(c.id);
+          } catch (err) {
+            console.error('Failed to load class details for', c.id, err);
+            // Fallback to summary if detail fails
+            return c;
           }
-        : c
-    ));
-  };
-
-  const addSubject = (classId: string, subject: Subject) => {
-    setClasses(classes.map(c => 
-      c.id === classId 
-        ? { ...c, subjects: [...c.subjects, subject] }
-        : c
-    ));
-  };
-
-  const deleteSubject = (classId: string, subjectId: string) => {
-    setClasses(classes.map(c => 
-      c.id === classId 
-        ? { 
-            ...c, 
-            subjects: c.subjects.filter(s => s.id !== subjectId),
-            marks: c.marks.filter(m => m.subjectId !== subjectId)
-          }
-        : c
-    ));
-  };
-
-  const updateGradeRules = (classId: string, rules: GradeRule[]) => {
-    setClasses(classes.map(c => 
-      c.id === classId 
-        ? { ...c, gradeRules: rules }
-        : c
-    ));
-  };
-
-  const updateMark = (classId: string, mark: Mark) => {
-    setClasses(classes.map(c => {
-      if (c.id !== classId) return c;
-      
-      const existingMarkIndex = c.marks.findIndex(
-        m => m.studentId === mark.studentId && m.subjectId === mark.subjectId
+        })
       );
 
-      if (existingMarkIndex >= 0) {
-        const updatedMarks = [...c.marks];
-        updatedMarks[existingMarkIndex] = mark;
-        return { ...c, marks: updatedMarks };
-      } else {
-        return { ...c, marks: [...c.marks, mark] };
-      }
-    }));
+      setClasses(detailedList);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load classes');
+      console.error('Failed to load classes:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const getClass = (classId: string) => {
-    return classes.find(c => c.id === classId);
+  const loadClass = async (classId: string | number): Promise<Class | null> => {
+    try {
+      setError(null);
+      const classData = await api.classesAPI.getById(classId);
+      
+      // Update in classes array
+      setClasses(prev => {
+        const index = prev.findIndex(c => String(c.id) === String(classId));
+        if (index >= 0) {
+          const updated = [...prev];
+          updated[index] = classData;
+          return updated;
+        }
+        return [...prev, classData];
+      });
+      
+      return classData;
+    } catch (err: any) {
+      setError(err.message || 'Failed to load class');
+      console.error('Failed to load class:', err);
+      return null;
+    }
+  };
+
+  const addClass = async (className: string) => {
+    try {
+      setError(null);
+      const newClass = await api.classesAPI.create(className);
+      
+      // Load the full class data
+      const fullClass = await api.classesAPI.getById(newClass.id);
+      setClasses(prev => [...prev, fullClass]);
+    } catch (err: any) {
+      setError(err.message || 'Failed to create class');
+      throw err;
+    }
+  };
+
+  const addStudent = async (classId: string | number, student: Omit<Student, 'id'>) => {
+    try {
+      setError(null);
+      const newStudent = await api.studentsAPI.add(classId, student.name, student.gender);
+      
+      // Refresh the class to get updated data
+      await refreshClass(classId);
+    } catch (err: any) {
+      setError(err.message || 'Failed to add student');
+      throw err;
+    }
+  };
+
+  const deleteStudent = async (classId: string | number, studentId: string | number) => {
+    try {
+      setError(null);
+      await api.studentsAPI.delete(classId, studentId);
+      
+      // Refresh the class to get updated data
+      await refreshClass(classId);
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete student');
+      throw err;
+    }
+  };
+
+  const addSubject = async (classId: string | number, subject: Omit<Subject, 'id'>) => {
+    try {
+      setError(null);
+      await api.subjectsAPI.add(classId, subject.name);
+      
+      // Refresh the class to get updated data
+      await refreshClass(classId);
+    } catch (err: any) {
+      setError(err.message || 'Failed to add subject');
+      throw err;
+    }
+  };
+
+  const deleteSubject = async (classId: string | number, subjectId: string | number) => {
+    try {
+      setError(null);
+      await api.subjectsAPI.delete(classId, subjectId);
+      
+      // Refresh the class to get updated data
+      await refreshClass(classId);
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete subject');
+      throw err;
+    }
+  };
+
+  const updateGradeRules = async (classId: string | number, rules: GradeRule[]) => {
+    try {
+      setError(null);
+      const updatedRules = await api.gradesAPI.update(classId, rules);
+      
+      // Update local state
+      setClasses(prev => prev.map(c => 
+        String(c.id) === String(classId) 
+          ? { ...c, gradeRules: updatedRules }
+          : c
+      ));
+    } catch (err: any) {
+      setError(err.message || 'Failed to update grade rules');
+      throw err;
+    }
+  };
+
+  const updateMark = async (classId: string | number, mark: Mark) => {
+    try {
+      setError(null);
+      await api.marksAPI.update(classId, mark.studentId, mark.subjectId, mark.mark);
+      
+      // Update local state optimistically
+      setClasses(prev => prev.map(c => {
+        if (String(c.id) !== String(classId)) return c;
+        
+        const existingMarkIndex = c.marks.findIndex(
+          m => String(m.studentId) === String(mark.studentId) && 
+               String(m.subjectId) === String(mark.subjectId)
+        );
+
+        if (existingMarkIndex >= 0) {
+          const updatedMarks = [...c.marks];
+          updatedMarks[existingMarkIndex] = mark;
+          return { ...c, marks: updatedMarks };
+        } else {
+          return { ...c, marks: [...c.marks, mark] };
+        }
+      }));
+    } catch (err: any) {
+      setError(err.message || 'Failed to update mark');
+      throw err;
+    }
+  };
+
+  const refreshClass = async (classId: string | number) => {
+    await loadClass(classId);
+  };
+
+  const getClass = (classId: string | number) => {
+    return classes.find(c => String(c.id) === String(classId));
+  };
+
+  const handleSetUser = (newUser: User | null) => {
+    setUser(newUser);
+    if (newUser) {
+      loadClasses();
+    } else {
+      api.authAPI.logout();
+      setClasses([]);
+    }
   };
 
   return (
@@ -157,9 +256,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       value={{
         user,
         classes,
-        setUser,
+        loading,
+        error,
+        setUser: handleSetUser,
+        loadClasses,
+        loadClass,
         addClass,
-        updateClass,
         addStudent,
         deleteStudent,
         addSubject,
@@ -167,6 +269,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         updateGradeRules,
         updateMark,
         getClass,
+        refreshClass,
       }}
     >
       {children}
