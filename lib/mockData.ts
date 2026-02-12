@@ -27,6 +27,9 @@ export interface Mark {
 export interface Class {
   id: string | number;
   name: string;
+  // Optional summary fields (from /classes list endpoint)
+  studentCount?: number;
+  subjectCount?: number;
   students: Student[];
   subjects: Subject[];
   gradeRules: GradeRule[];
