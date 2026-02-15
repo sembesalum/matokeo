@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Matokeo - Teacher Results Management",
-  description: "Teacher-centric results management tool",
+  title: "Stationary Kiganjani - Tools for Teachers & Students",
+  description: "Results calculations (Matokeo), CV builder, documents, and more.",
 };
 
 export default function RootLayout({

@@ -27,7 +27,7 @@ export default function LoginPage() {
         email: response.user.email,
         role: response.user.role,
       });
-      router.push('/dashboard');
+      router.push('/');
     } catch (err: any) {
       setError(err.message || 'Invalid email or password');
     } finally {
@@ -40,10 +40,10 @@ export default function LoginPage() {
       <div className="w-full max-w-md p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-xl">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Matokeo
+            Stationary Kiganjani
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Teacher Results Management
+            Sign in to access your tools
           </p>
         </div>
 
