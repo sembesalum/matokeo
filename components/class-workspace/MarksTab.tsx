@@ -9,14 +9,14 @@ export default function MarksTab({ classId }: { classId: string }) {
 
   if (!classData) return null;
 
-  const getMark = (studentId: string, subjectId: string): number => {
+  const getMark = (studentId: string | number, subjectId: string | number): number => {
     const mark = classData.marks.find(
-      m => m.studentId === studentId && m.subjectId === subjectId
+      m => String(m.studentId) === String(studentId) && String(m.subjectId) === String(subjectId)
     );
     return mark?.mark ?? 0;
   };
 
-  const handleMarkChange = (studentId: string, subjectId: string, value: string) => {
+  const handleMarkChange = (studentId: string | number, subjectId: string | number, value: string) => {
     const markValue = parseInt(value) || 0;
     if (markValue >= 0 && markValue <= 100) {
       const mark: Mark = { studentId, subjectId, mark: markValue };
