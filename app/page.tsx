@@ -67,6 +67,15 @@ export default function HomePage() {
             <p className="mt-2 text-gray-600 dark:text-gray-400 text-lg">
               Choose a tool below to get started
             </p>
+            <Link
+              href="/subscribe"
+              className="mt-4 inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
+            >
+              View Free & Pro plans
+              <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
           </header>
 
           <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
