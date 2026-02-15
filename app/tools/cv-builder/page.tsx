@@ -185,7 +185,7 @@ export default function CVBuilderPage() {
                             type={type}
                             className={inputClass}
                             placeholder={placeholder}
-                            value={(data.personal as Record<string, string>)[key] ?? ''}
+                            value={data.personal[key as keyof typeof data.personal] ?? ''}
                             onChange={(e) => updatePersonal({ [key]: e.target.value })}
                           />
                         </div>
@@ -238,7 +238,7 @@ export default function CVBuilderPage() {
                                 <label className={labelClass}>{label}</label>
                                 <input
                                   className={inputClass}
-                                  value={(ed as Record<string, string>)[key] ?? ''}
+                                  value={(ed as CVEducation)[key as keyof CVEducation] ?? ''}
                                   onChange={(e) => updateEducation(ed.id, { [key]: e.target.value })}
                                 />
                               </div>
@@ -288,7 +288,7 @@ export default function CVBuilderPage() {
                                 <label className={labelClass}>{label}</label>
                                 <input
                                   className={inputClass}
-                                  value={(ex as Record<string, string>)[key] ?? ''}
+                                  value={(ex as CVExperience)[key as keyof CVExperience] ?? ''}
                                   onChange={(e) => updateExperience(ex.id, { [key]: e.target.value })}
                                 />
                               </div>
@@ -426,7 +426,7 @@ export default function CVBuilderPage() {
                               <input
                                 className={inputClass}
                                 type={key === 'email' ? 'email' : 'text'}
-                                value={(r as Record<string, string>)[key] ?? ''}
+                                value={(r as CVReference)[key as keyof CVReference] ?? ''}
                                 onChange={(e) => updateReference(r.id, { [key]: e.target.value })}
                               />
                             </div>
